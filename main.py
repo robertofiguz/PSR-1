@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 import argparse
 from ast import Str
-from random import Random, choice, random
-
+from random import Random, choice, random, sample
+import string
+from datetime import datetime
 parser = argparse.ArgumentParser(description='Typing test')
 
 parser.add_argument(
     '-utm',
     '--use_time_mode' ,
+    action=argparse.BooleanOptionalAction,
     help='Max number of secs for time mode or maximum number of inputs for number of inputs mode.'
     )
 # bool is accepting any string as it only converts input into bool and therefore it will take any string as true, even false
@@ -20,14 +22,43 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-def main():
+def results():
     pass
+
+def time_mode(max):
+
+    startTime = datetime.now()
+
+    while not (datetime.now()-startTime).total_seconds() >= max:
+        letter = choice(string.ascii_lowercase)
+        userInput = input(f'Input letter {letter} \n')
+        if userInput != letter:
+            print("wrong")
+        else:
+            print("correct")
+
+def count_mode(max):
+    for i in range(max): 
+        letter = choice(string.ascii_lowercase)
+        userInput = input(f'Input letter {letter} \n')
+        if userInput != letter:
+            print("wrong")
+        else:
+            print("correct")
+
 
 if __name__ == '__main__':
     args = parser.parse_args()
     max = args.max_value
     mode = args.use_time_mode
-    print(mode)
+    print(max)
+    if mode:
+        time_mode(max)
+    else:
+        count_mode(max)
+
+    results()
+
 
 '''
 TODO:
