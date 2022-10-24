@@ -3,8 +3,12 @@ import argparse
 from ast import Str
 from random import Random, choice, random, sample
 import string
-from datetime import datetime
+from datetime import date, datetime
 import getch
+from termcolor import colored
+from time import time
+import pprint
+
 parser = argparse.ArgumentParser(description='Typing test')
 
 parser.add_argument(
@@ -23,29 +27,28 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-
+class Input:
+    def __init__(self, requested, received, duration):    
+        self.requested:str = requested
+        self.received:str = received
+        self.duration:float = duration
+  
+    def __str__(self):
+        return 'Input(requested=' + str(self.requested) + ' ,received=' + (self.received) + ',duration=' + str(self.duration)+')'
 class Test:
     def __init__(self, utm: bool, max: int):
         self.type = utm
         self.max = max
-        self.logs = []
-        # self.logs = {'accuracy': 0.0,
-        #              'inputs': [Input(requested='v', received='s', duration=0.11265206336975098),
-        #                         Input(requested='w', received='d',
-        #                               duration=0.07883906364440918),
-        #                         Input(requested='d', received='a',
-        #                               duration=0.0720210075378418),
-        #                         Input(requested='a', received='s',
-        #                               duration=0.0968179702758789),
-        #                         Input(requested='b', received='d', duration=0.039067983627319336)],
-        #              'number_of_hits': 0,
-        #              'number_of_types': 0,
-        #              'test_duration': 0,
-        #              'test_end': '',
-        #              'test_start': '',
-        #              'type_average_duration': 0,
-        #              'type_hit_average_duration': 0,
-        #              'type_miss_average_duration': 0}
+        self.logs = {'accuracy': 0.0,
+                    'inputs': [],
+                    'number_of_hits': 0,
+                    'number_of_types': 0,
+                    'test_duration': "",
+                    'test_end': "",
+                    'test_start': datetime.today(),
+                    'type_average_duration': 0,
+                    'type_hit_average_duration': 0,
+                    'type_miss_average_duration': 0}
 
         print("Input any key to start the test")
         getch.getch()
@@ -55,18 +58,44 @@ class Test:
             self.countMode(max)
 
     def logResults(self):
-        pass
+        self.logs['test_end']=datetime.today()
+        self.logs['test_duration']=(self.logs['test_end']-self.logs['test_start']).total_seconds()
+        self.logs['types'] = len(self.logs['inputs'])
+        self.logs['number_of_types'] = len(self.logs['inputs'])
+        self.logs['accuracy'] = self.logs['number_of_hits']/self.logs['number_of_types']
+        self.logs['test_end'] = self.logs['test_end'].strftime('%c')
+        self.logs['test_start'] = self.logs['test_start'].strftime('%c')
+        self.logs['type_average_duration'] = self.logs['test_duration']/self.logs['number_of_types']
+        try:
+            self.logs['type_hit_average_duration'] = self.logs['type_hit_average_duration'] / self.logs['number_of_hits']
+        except ZeroDivisionError:
+            pass
+        try:
+            self.logs['type_miss_average_duration'] = self.logs['type_miss_average_duration'] / (self.logs['types']-self.logs['number_of_hits'])
+        except ZeroDivisionError:
+            pass
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(self.logs)
+        exit()
 
     def getInput(self):
         letter = choice(string.ascii_lowercase)
         print(f'Input letter {letter}')
+        startTime = time()
         userInput = getch.getch()
+        endTime = time()
+        elapsed = endTime-startTime
+        if userInput == " ":
+           self.logResults()
         if letter != userInput:
-            print("wrong")
+            self.logs['type_miss_average_duration'] += elapsed
+            print("wrong input: ",colored(userInput, 'red'))
         else:
-            print("correct")
-
-        self.logs.append({"requested": letter, "input": userInput})
+            self.logs['number_of_hits'] += 1
+            self.logs['type_hit_average_duration'] += elapsed
+            print("correct input: ",colored(userInput, 'green'))
+        
+        self.logs['inputs'].append(Input(requested=letter, received=userInput, duration=elapsed).__str__())
 
     def countMode(self, max):
         print(f"Starting test in count mode - {max} sequences")
@@ -75,11 +104,11 @@ class Test:
 
     def timeMode(self, max):
         print(f"Starting test in time mode with duration {max}")
-        startTime = datetime.now()
-        while not (datetime.now()-startTime).total_seconds() >= max:
+        startTime = time()
+        while not (time()-startTime) >= max:
             self.getInput()
-        if (datetime.now()-startTime).total_seconds() > max:
-            print(f"Time exceed by {(datetime.now()-startTime).total_seconds()-max}")
+        if (time()-startTime)> max:
+            print(f"Time exceed by {(time()-startTime)-max}")
 
 
 if __name__ == '__main__':
@@ -87,30 +116,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     test = Test(args.use_time_mode, args.max_value)
     test.logResults()
-'''
-TODO:
-- read input from user
-- wait for input from user to start the test
-- how to randomize letter? 
-    - create a list with all the letters and use choice?
-    - is there a more elegant way to implement this?
-- compare the entry with the letter shown
-- define space as exit from the loop
-- logs:
-    - requested letter
-    - received letter
-    - time from being shown until the input
-    (use a namedtuple for this)
 
-    - after the test is finnished, calculate:
-        - test_duration
-        - test_start
-        - test_end
-        - number_of_hits
-        - accuracy
-        - type_average_duration
-        - type_hit_average_duration
-        - type_miss_average_duration
-
-    print the resulting dict. using prettyprint
-'''
