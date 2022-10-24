@@ -28,9 +28,9 @@ class Test:
         self.max = max
         self.logs = []
         if utm:
-            self.countMode(max)
-        else:
             self.timeMode(max)
+        else:
+            self.countMode(max)
             
     def logResults(self):
         pass
@@ -46,12 +46,12 @@ class Test:
         self.logs.append({"requested":letter, "input":userInput})
 
     def countMode(self, max):
-        print("Starting test in count mode")
+        print(f"Starting test in count mode - {max} sequences")
         for i in range(max): 
             response = self.getInput()
         self.logResults()
     def timeMode(self, max):
-        print("Starting test in time mode")
+        print(f"Starting test in time mode with duration{max}")
         startTime = datetime.now()
         while not (datetime.now()-startTime).total_seconds() >= max:
             response = self.getInput()
@@ -61,7 +61,7 @@ class Test:
 if __name__ == '__main__':
 
     args = parser.parse_args()
-    test = Test(args.max_valu, args.use_time_mode)
+    test = Test(args.use_time_mode, args.max_value)
 
 '''
 TODO:
