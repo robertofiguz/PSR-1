@@ -22,43 +22,46 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-def results():
-    pass
+class Test:
+    def __init__(self, utm:bool, max:int ):
+        self.type = utm
+        self.max = max
+        self.logs = []
+        if utm:
+            self.countMode(max)
+        else:
+            self.timeMode(max)
+            
+    def logResults(self):
+        pass
 
-def time_mode(max):
-
-    startTime = datetime.now()
-
-    while not (datetime.now()-startTime).total_seconds() >= max:
+    def getInput(self):
         letter = choice(string.ascii_lowercase)
         userInput = input(f'Input letter {letter} \n')
-        if userInput != letter:
+        if letter != userInput:
             print("wrong")
         else:
             print("correct")
 
-def count_mode(max):
-    for i in range(max): 
-        letter = choice(string.ascii_lowercase)
-        userInput = input(f'Input letter {letter} \n')
-        if userInput != letter:
-            print("wrong")
-        else:
-            print("correct")
+        self.logs.append({"requested":letter, "input":userInput})
+
+    def countMode(self, max):
+        print("Starting test in count mode")
+        for i in range(max): 
+            response = self.getInput()
+        self.logResults()
+    def timeMode(self, max):
+        print("Starting test in time mode")
+        startTime = datetime.now()
+        while not (datetime.now()-startTime).total_seconds() >= max:
+            response = self.getInput()
+        self.logResults()
 
 
 if __name__ == '__main__':
+
     args = parser.parse_args()
-    max = args.max_value
-    mode = args.use_time_mode
-    print(max)
-    if mode:
-        time_mode(max)
-    else:
-        count_mode(max)
-
-    results()
-
+    test = Test(args.max_valu, args.use_time_mode)
 
 '''
 TODO:
