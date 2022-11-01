@@ -1,13 +1,24 @@
+#######################################################################################
+#  Trabalho Prático 1 - PSR Typing Test 
+# 
+#  Elaborado por:
+#       João Figueiredo 116189
+#       Magda Leitão 98214
+#       Roberto Figueiredo 116147
+#######################################################################################
+
 #!/usr/bin/env python3
 import argparse
-from random import choice
 import string
-from datetime import datetime
 import getch
+import pprint
+from random import choice
+from datetime import datetime
 from termcolor import colored
 from time import time
 from collections import namedtuple
-import pprint
+
+
 parser = argparse.ArgumentParser(description='Typing test')
 
 parser.add_argument(
@@ -21,6 +32,7 @@ parser.add_argument(
     '-mv',
     '--max_value',
     type=int,
+    required=True,
     help='Max number of secs for time mode or maximum number of inputs for number of inputs mode.'
 )
 
@@ -44,8 +56,8 @@ class Test:
                      'type_average_duration': 0,
                      'type_hit_average_duration': 0,
                      'type_miss_average_duration': 0}
-
         print("Input any key to start the test")
+
         s = getch.getch()
         if s == " ":  # spacebar
             self.logResults()
@@ -81,6 +93,10 @@ class Test:
             self.logs['type_miss_average_duration'] = self.logs['type_miss_average_duration'] / (self.logs['types']-self.logs['number_of_hits'])
         pp = pprint.PrettyPrinter(indent=4)
         pp.pprint(self.logs)
+
+        # save logs to json file
+        with open(f'logs_{(self.logs["test_start"]).replace(" ", "_")}.json', 'w') as f:
+            f.write(str(self.logs))
         exit()
 
     def getInput(self):
@@ -121,3 +137,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     test = Test(args.use_time_mode, args.max_value)
     test.logResults()
+
