@@ -6,9 +6,8 @@ from datetime import datetime
 import getch
 from termcolor import colored
 from time import time
-import pprint
 from collections import namedtuple
-
+import pprint
 parser = argparse.ArgumentParser(description='Typing test')
 
 parser.add_argument(
@@ -47,7 +46,9 @@ class Test:
                      'type_miss_average_duration': 0}
 
         print("Input any key to start the test")
-        getch.getch()
+        s = getch.getch()
+        if s == " ":  # spacebar
+            self.logResults()
         if utm:
             self.timeMode(max)
         else:
@@ -59,22 +60,25 @@ class Test:
             self.logs['test_end']-self.logs['test_start']).total_seconds()
         self.logs['types'] = len(self.logs['inputs'])
         self.logs['number_of_types'] = len(self.logs['inputs'])
-        self.logs['accuracy'] = self.logs['number_of_hits'] / \
-            self.logs['number_of_types']
         self.logs['test_end'] = self.logs['test_end'].strftime('%c')
         self.logs['test_start'] = self.logs['test_start'].strftime('%c')
-        self.logs['type_average_duration'] = self.logs['test_duration'] / \
-            self.logs['number_of_types']
-        try:
-            self.logs['type_hit_average_duration'] = self.logs['type_hit_average_duration'] / \
-                self.logs['number_of_hits']
-        except ZeroDivisionError:
-            pass
-        try:
-            self.logs['type_miss_average_duration'] = self.logs['type_miss_average_duration'] / \
-                (self.logs['types']-self.logs['number_of_hits'])
-        except ZeroDivisionError:
-            pass
+            
+        if self.logs['number_of_types'] == 0:
+            self.logs['accuracy'] = 0.0
+            self.logs['type_average_duration'] = 0.0
+        else:
+            self.logs['type_average_duration'] = self.logs['test_duration'] / \
+                self.logs['number_of_types']
+            self.logs['accuracy'] = self.logs['number_of_hits'] / self.logs['number_of_types']
+        if self.logs['number_of_hits'] == 0:
+             self.logs['type_hit_average_duration'] = 0.0
+             self.logs['type_miss_average_duration'] = 0.0
+        else:
+            self.logs['type_hit_average_duration'] = self.logs['type_hit_average_duration'] / self.logs['number_of_hits']
+        if self.logs['number_of_types'] - self.logs['number_of_hits'] == 0:
+            self.logs['type_miss_average_duration'] = 0.0
+        else:
+            self.logs['type_miss_average_duration'] = self.logs['type_miss_average_duration'] / (self.logs['types']-self.logs['number_of_hits'])
         pp = pprint.PrettyPrinter(indent=4)
         pp.pprint(self.logs)
         exit()
